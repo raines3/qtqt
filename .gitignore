@@ -1,0 +1,4 @@
+venv/
+_pycashe_/
+*.pyc
+.vscode/
