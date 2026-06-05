@@ -25,6 +25,13 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Введите логин и пароль </string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLineEdit" name="login_input"/>
      </item>
      <item>

@@ -26,6 +26,19 @@ class ui(QMainWindow):
       super().__init__()
       self.setWindowTitle("Авторизация")
       uic.loadUi("avt.ui", self)
+      self.user_password = "qwerty"
+      self.user_login = "123456"
+
+      self.login_btn.clicked.connect(self.prov)
+
+   def prov(self):
+      if self.user_password == self.pass_input.text() and self.user_login == self.login_input.text():
+         self.label.setText("Пароль и логин введен правильно")
+      else:
+         self.label.setText("Пароль и логин введен неправильно")
+
+
+
    
 
 if __name__ == "__main__":
