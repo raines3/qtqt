@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QBoxLayout
 import sys
+import random
 
 class QuotApp (QWidget):
     def __init__(self):
@@ -11,10 +12,17 @@ class QuotApp (QWidget):
         self.btn = QPushButton("Показать цитату", self)
         self.label = QLabel("Нажми на кнопку", self)
 
+        self.btn.clicked.connect(self.show_quote)
+
         layout = QBoxLayout()
         layout.addWidget(self.btn)
         layout.addWidget(self.label)
         self.setLayout(layout)
+
+    def show_quote(self):
+        self.label.setText(random.choice(self.qoutes))
+
+
 
     
 
