@@ -10,20 +10,24 @@ class ParcentApp(QWidget):
 
         self.num_input = QLineEdit(self)
         self.num_input.setPlaceholderText("Число")
-        self.num_input2 = QLineEdit(self)
-        self.btn = QPushButton(self)
-        self.label = QLabel(self)
+        self.perc_input = QLineEdit(self)
+        self.perc_input.setPlaceholderText("Процент")
+
+        self.btn = QPushButton("Посчитать", self)
+        self.label = QLabel("Результат: ", self)
 
         self.btn.clicked.connect(self.calculate)
 
         layout = QBoxLayout()
         layout.addWidget(self.num_input)
+        layout.addWidget(self.perc_input)
         layout.addWidget(self.layoutbtn)
         layout.addWidget(self.label)
+        self.setLayout(layout)
 
     def calculate(self):
-        res = self.num_input + self.num_input2
-        self.label.setText(f"{res}")
+        res = float(self.num_input.text()) * float(self.perc_input.text())/100
+        self.label.setText(f"Результат: {res}")
 
 
 if __name__ == "__main__":
