@@ -71,5 +71,8 @@ class Orion_main(QMainWindow):
         self.pushButton_3.clicked.connect(self.on_add)
 
     def on_add(self):
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute()
         
 
