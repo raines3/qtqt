@@ -169,7 +169,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="admin">
     <property name="geometry">
      <rect>
       <x>10</x>
