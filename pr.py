@@ -73,6 +73,7 @@ class Orion_main(QMainWindow):
     def on_add(self):
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
-        cursor.execute()
+        cursor.execute('SELECT ')
+        
         
 
