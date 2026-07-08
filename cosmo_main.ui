@@ -192,7 +192,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QLineEdit" name="lineEdit_3">
+       <widget class="QLineEdit" name="pilot_name_input">
         <property name="placeholderText">
          <string>Введите ФИО пилота</string>
         </property>
