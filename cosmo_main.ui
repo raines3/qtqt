@@ -53,7 +53,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="flight_table">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -86,17 +86,17 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QLineEdit" name="lineEdit">
+       <widget class="QLineEdit" name="dest_input">
         <property name="placeholderText">
          <string>Введите пункт назначения</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox"/>
+       <widget class="QComboBox" name="combo_pilots"/>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_2">
+       <widget class="QLineEdit" name="weight_input">
         <property name="placeholderText">
          <string>Введите вес груза в тоннах</string>
         </property>
@@ -128,7 +128,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="start_btn">
         <property name="text">
          <string>Запустить корабль в производство</string>
         </property>
