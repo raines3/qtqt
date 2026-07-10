@@ -45,7 +45,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="close_btn">
        <property name="text">
         <string>сменить пользователя</string>
        </property>
@@ -179,7 +179,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>GroupBox</string>
+     <string>Админ панель</string>
     </property>
     <widget class="QWidget" name="horizontalLayoutWidget_4">
      <property name="geometry">
@@ -212,7 +212,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="new_btn">
         <property name="text">
          <string>Добавить нового пилота</string>
         </property>
@@ -244,7 +244,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="del_btn">
         <property name="text">
          <string>Анулировать</string>
         </property>
