@@ -6,9 +6,10 @@ import sqlite3
 class orion_dialog(QDialog):
     def __init__(self):
         super().__init__()
-        uic.loadUi("cosmo_dialog.ui", self)
-        self.db_name = "orion.db"
+        uic.loadUi("cosmo_dialog.ui", self) #подключение интерфейса
+        self.db_name = "orion.db" # создание бд
         self.init_db()
+        
 
         self.open_btn.clicked.connect(self.check_autho)
 
@@ -40,10 +41,11 @@ class orion_dialog(QDialog):
             cursor.execute("INSERT INTO users(role, password) VALUES (?, ?)", ("диспетчер", "123"))
             cursor.execute("INSERT INTO users(role, password) VALUES (?, ?)", ("координатор", "222"))
             
-            test_pilots = [("В.А Камаров", "Доступен"),
-                           ("Н.П. Филипов", "Доступен")]
+            test_pilots = [("В.А Камаров", "Доступен"),  #sp = [1,2]    x,a = sp sp = [(1,2),(1,2)]
+                           ("Н.П. Филипов", "Доступен")] 
             
-            cursor.executemany("INSERT INTO pilots(name, status) VALUES (?, ?)", test_pilots)
+            for p in test_pilots:
+                    cursor.execute("INSERT INTO pilots(name, status) VALUES (?, ?)", (p[0],p[1]))
 
 
      
@@ -74,13 +76,14 @@ class orion_dialog(QDialog):
         self.password_input.clear()
 
 
-class Orion_main(QMainWindow):
-    def __init__(self, role, db_name):
+class Orion_main(QMainWindow): #основное окно
+    def __init__(self, role, db_name): #инициализация окна
         super().__init__()
-        uic.loadUi("cosmo_main.ui", self)
+        uic.loadUi("cosmo_main.ui", self) #подключение интерфейса
         self.user_role = role
         self.db_name = db_name
         self.label.setText(f"Активная сессия {self.user_role}")
+        self.refresh_all()
         if self.user_role == "диспетчер":
             self.admin.setVisible(False)
         
@@ -90,45 +93,52 @@ class Orion_main(QMainWindow):
         self.del_btn.clicked.connect(self.on_delete)
 
     def refresh_all(self):
-        conn = sqlite3.connect(self.db_name)
-        cursor = conn.cursor()
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
 
-        cursor.execute("SELECT id, name FROM pilots WHERE status = 'Доступен' ORDER BY name")
-
-        pilots = cursor.fetchall()
-        self.combo_pilots.clear()
-
-        for pilot_id, name in pilots:
-            self.combo_pilots.setItem(pilot_id, name)
-        
-
-        cursor.execute("""SELECT flights.id, flights.destination, flights.weight, flights.status,
-                        COALESCE(pilots.name, 'Не назначен') as pilot_name 
-                        FROM flights  JOIN pilots  ON flights.pilot_id = pilots.id 
-                        ORDER BY flights.id DESC""")
-        flights = cursor.fetchall()
-
-        self.flight_table.setRowCount(len(flights))
-
-        for row, flight in enumerate(flights):
-            for col, val in enumerate(flight):
-                item = QTableWidgetItem(str(val))
-
-                if col == 2:
-                    item.setText(f'{val} т')
-                
-                self.flight_table.setItem(row, col, item)
-
+            # Обновление комбобокса с пилотами
+            cursor.execute("SELECT id, name FROM pilots WHERE status = 'Доступен' ORDER BY name")
+            pilots = cursor.fetchall()
+            print(f"Найдено пилотов: {len(pilots)}")  # Отладка
+            
+            self.combo_pilots.clear()
+            for pilot_id, name in pilots:
+                self.combo_pilots.addItem(name, pilot_id)  # Используйте addItem с данными
+            
+            # Получение рейсов
+            cursor.execute("""SELECT flights.id,flights.pilot_id, flights.destination,flights.weight, flights.status
+                            FROM flights 
+                            LEFT JOIN pilots ON flights.pilot_id = pilots.id 
+                            ORDER BY flights.id DESC""")
+            flights = cursor.fetchall()
+            print(f"Найдено рейсов: {len(flights)}")  # Отладка
+            
+            # Настройка таблицы
+            self.flight_table.setRowCount(len(flights))
+            self.flight_table.setColumnCount(4)  # Убедитесь, что 4 колонки
+            
+            for row, flight in enumerate(flights):
+                for col, val in enumerate(flight):
+                    item = QTableWidgetItem(str(val))
+                    self.flight_table.setItem(row, col, item)
+            
+            conn.close()
+            
+        except Exception as e:
+            print(f"Ошибка в refresh_all: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить данные: {e}")
 
             
 
        
 
-        
-    def on_add(self):
+         
+    def on_add(self): #добавление нового полета
         dest = self.dest_input.text().strip()
         weight_text = self.weight_input.text().strip()
-        pilot_id = self.combo_pilots.currentData()
+        pilot_id = self.combo_pilots.currentText()
+        print(dest,pilot_id,weight_text)
 
         if not dest or not weight_text:
             QMessageBox.warning(self, "Ошибка", "Заполните все поля")
@@ -148,11 +158,18 @@ class Orion_main(QMainWindow):
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
         
-        cursor.execute("SELECT name FROM pilots WHERE id = ?")
-        cursor.execute('INSERT INTO flights(destination,weight,pilot_id) VALUES (?, ?, ?)', (dest, weight_text, pilot_id))
+    
+        cursor.execute('INSERT INTO flights(destination,weight,pilot_id,status) VALUES (?, ?, ?,?)', (dest, weight_text, pilot_id,"Назначен"))
+        conn.commit()
+        conn.close()
+
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
         cursor.execute("UPDATE pilots SET status = 'В рейсе' WHERE id = ?", (pilot_id,))
         conn.commit()
         conn.close()
+
+
 
         self.dest_input.clear()
         self.weight_input.clear()
@@ -184,15 +201,15 @@ class Orion_main(QMainWindow):
         
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO pilots (name) VALUES (?)", (pilot_name,))
+        cursor.execute("INSERT INTO pilots (name, status) VALUES (?, ?)", (pilot_name, "Доступен"))
         conn.commit()
         conn.close()
 
         self.pilot_name_input.clear()
 
-        QMessageBox.information(self, "Успешно", f"Добавлен пилот: {pilot_name}")
-
         self.refresh_all()
+
+        QMessageBox.information(self, "Успешно", f"Добавлен пилот: {pilot_name}")
 
     def on_delete(self):
         current_row = self.flight_table.currentRow()
@@ -201,18 +218,18 @@ class Orion_main(QMainWindow):
             return
         
         flight_id = int(self.flight_table.item(current_row, 0).text())
-        dest = self.flight_table.item(current_row, 1).text()
 
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor() 
         cursor.execute("SELECT pilot_id FROM flights WHERE id = ?", (flight_id,))
         res = cursor.fetchone()
         if res and res[0]:
-            self.cursor.execute("UPDATE pilots SET status = 'Доступен' WHERE id = ?", (res[0],))
+            cursor.execute("UPDATE pilots SET status = 'Доступен' WHERE id = ?", (res[0],))
         
         cursor.execute("DELETE FROM flights WHERE id = ?", (flight_id, ))
         conn.commit()
         conn.close()
+        self.refresh_all()
  
 
         
@@ -231,11 +248,15 @@ if __name__ == "__main__":
                         }
                         QLineEdit, QComboBox {
                         background-color: #21262d;
-                        color: #30363d;
+                        color: #0077ff;
                         border: 1px solid #30363d;}
                         QPushButton {
-                        background-color: #2338636;
-                        color: #white}""")
+                        background-color: #233863;
+                        color: #ffffff;}
+                        QTableWidget {
+                        background-color: #0d1117;
+                        color: #c9d1d9;
+                        border: 1px solid #30363d;}""")
     
     while True:
 

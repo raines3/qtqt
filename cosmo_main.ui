@@ -62,6 +62,26 @@
       <height>181</height>
      </rect>
     </property>
+    <column>
+     <property name="text">
+      <string>Пунк назначения</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Пилот</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Вес</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Статус</string>
+     </property>
+    </column>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
