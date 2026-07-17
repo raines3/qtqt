@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>811</width>
-    <height>597</height>
+    <width>800</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,12 +64,17 @@
     </property>
     <column>
      <property name="text">
-      <string>Пунк назначения</string>
+      <string>id</string>
      </property>
     </column>
     <column>
      <property name="text">
       <string>Пилот</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Пунк назначения</string>
      </property>
     </column>
     <column>
@@ -170,32 +175,13 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="verticalLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>290</y>
-      <width>781</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>Изменить статус рейса</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QGroupBox" name="admin">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>419</y>
       <width>781</width>
-      <height>111</height>
+      <height>261</height>
      </rect>
     </property>
     <property name="title">
@@ -266,7 +252,7 @@
       <item>
        <widget class="QPushButton" name="del_btn">
         <property name="text">
-         <string>Анулировать</string>
+         <string>Анулировать выбранный рейс</string>
         </property>
        </widget>
       </item>
@@ -285,6 +271,136 @@
       </item>
      </layout>
     </widget>
+    <widget class="QWidget" name="horizontalLayoutWidget_7">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>150</y>
+       <width>781</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLineEdit" name="age_input">
+        <property name="placeholderText">
+         <string>Введите возраст выбранного пилота</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="combo_info_pilots">
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="exp_input">
+        <property name="placeholderText">
+         <string>Введите стаж выбранного пилота</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>190</y>
+       <width>781</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLineEdit" name="bio_input">
+        <property name="placeholderText">
+         <string>Введите краткую биографию выбранного пилота</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="add_info_btn">
+        <property name="text">
+         <string>Добавить информацию о пилоте</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="horizontalLayoutWidget_8">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>110</y>
+       <width>781</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Добавление информации о пилоте</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_8">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_6">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>290</y>
+      <width>781</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="QPushButton" name="change_btn">
+       <property name="text">
+        <string>Изменить статус рейса</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="info_btn">
+       <property name="text">
+        <string>Узнать информацию о выбраном пилоте</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -292,7 +408,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>811</width>
+     <width>800</width>
      <height>21</height>
     </rect>
    </property>

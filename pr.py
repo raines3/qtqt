@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QDialog, QApplication, QMessageBox, QTableWidgetItem
+from PyQt6.QtWidgets import QHeaderView, QMainWindow, QDialog, QApplication, QMessageBox, QTableWidgetItem
 from PyQt6 import uic
 import sys 
 import sqlite3
@@ -33,6 +33,14 @@ class orion_dialog(QDialog):
                             destination TEXT NOT NULL,
                             weight INTEGER NOT NULL,
                             status TEXT NOT NULL,
+                            pilot_id INTEGER,
+                            FOREIGN KEY (pilot_id) REFERENCES pilots(id) ON DELETE CASCADE)""")
+        
+        cursor.execute("""CREATE TABLE IF NOT EXISTS infomation(
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            age INTEGER NOT NULL,
+                            exp INTEGER NOT NULL,
+                            bio TEXT NOT NULL,
                             pilot_id INTEGER,
                             FOREIGN KEY (pilot_id) REFERENCES pilots(id) ON DELETE CASCADE)""")
         
@@ -91,8 +99,10 @@ class Orion_main(QMainWindow): #основное окно
         self.close_btn.clicked.connect(self.close)
         self.new_btn.clicked.connect(self.new_pilot)
         self.del_btn.clicked.connect(self.on_delete)
+        self.change_btn.clicked.connect(self.change_status)
 
     def refresh_all(self):
+        self.flight_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         try:
             conn = sqlite3.connect(self.db_name)
             cursor = conn.cursor()
@@ -103,6 +113,7 @@ class Orion_main(QMainWindow): #основное окно
             print(f"Найдено пилотов: {len(pilots)}")  # Отладка
             
             self.combo_pilots.clear()
+            self.combo_pilots.addItem("Выберите пилота")
             for pilot_id, name in pilots:
                 self.combo_pilots.addItem(name, pilot_id)  # Используйте addItem с данными
             
@@ -116,7 +127,7 @@ class Orion_main(QMainWindow): #основное окно
             
             # Настройка таблицы
             self.flight_table.setRowCount(len(flights))
-            self.flight_table.setColumnCount(4)  # Убедитесь, что 4 колонки
+            self.flight_table.setColumnCount(5)  # Убедитесь, что 4 колонки
             
             for row, flight in enumerate(flights):
                 for col, val in enumerate(flight):
@@ -151,7 +162,7 @@ class Orion_main(QMainWindow): #основное окно
             QMessageBox.warning(self, "Ошибка", "Вес должен быть числом")
             return
 
-        if pilot_id is None:
+        if pilot_id is None or pilot_id == "" :
             QMessageBox.warning(self, "Ошибка", "Нет доступных пилотов")
             return
 
@@ -165,7 +176,7 @@ class Orion_main(QMainWindow): #основное окно
 
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
-        cursor.execute("UPDATE pilots SET status = 'В рейсе' WHERE id = ?", (pilot_id,))
+        cursor.execute("UPDATE pilots SET status = 'В рейсе' WHERE name = ?", (pilot_id,))
         conn.commit()
         conn.close()
 
@@ -183,15 +194,16 @@ class Orion_main(QMainWindow): #основное окно
             return
         
         flight_id = int(self.flight_table.item(current_row, 0).text())
-        current_status = self.flight_table.item(current_row, 3).text()
+        current_status = self.flight_table.item(current_row, 4).text()
 
-        new_status = "В полете" if current_status == "Формируется" else "Формируется"
+        new_status = "Назначен" if current_status == "Формируется" else "Формируется"
         
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
         cursor.execute("UPDATE flights SET status = ? WHERE id = ?", (new_status, flight_id))
         conn.commit()
         conn.close()
+        self.refresh_all()
     
     def new_pilot(self):
         pilot_name = self.pilot_name_input.text().strip()
@@ -231,6 +243,25 @@ class Orion_main(QMainWindow): #основное окно
         conn.close()
         self.refresh_all()
  
+class Info_Dialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        uic.loadUi("orion_info_dialog.ui", self)
+    
+    def show_info(self):
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute("""SELECT infomation.id, infomation.age, infomation.exp, infomation.bio, infomation.pilot_id
+                            FROM infomation
+                            JOIN pilots ON infomation.pilot_id = pilots.id
+                            ORDER BY infomation.id""")
+        info = cursor.fetchall()
+        self.age_label.addText(f"Возраст: {info[1]}")
+        self.exp_label.addText(f"Стаж: {info[2]}")
+        self.bio_label.addText(f"Биография: {info[3]}")
+        self.info_label.addTetx(f"Информация о: {info[4]}")
+
+    
 
         
         
