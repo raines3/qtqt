@@ -100,6 +100,8 @@ class Orion_main(QMainWindow): #основное окно
         self.new_btn.clicked.connect(self.new_pilot)
         self.del_btn.clicked.connect(self.on_delete)
         self.change_btn.clicked.connect(self.change_status)
+        self.add_info_btn.clicked.connect(self.add_info)
+        self.info_btn.clicked.connect(self.open_info)
 
     def refresh_all(self):
         self.flight_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -110,18 +112,23 @@ class Orion_main(QMainWindow): #основное окно
             # Обновление комбобокса с пилотами
             cursor.execute("SELECT id, name FROM pilots WHERE status = 'Доступен' ORDER BY name")
             pilots = cursor.fetchall()
-            print(f"Найдено пилотов: {len(pilots)}")  # Отладка
+            pilots_len = len(pilots)
+            print(f"Найдено пилотов: {pilots_len}")  # Отладка
             
             self.combo_pilots.clear()
-            self.combo_pilots.addItem("Выберите пилота")
+            if pilots_len > 0:
+                self.combo_pilots.addItem("Выберите пилота")
+                self.combo_info_pilots.addItem("Выберите пилота")
+            
             for pilot_id, name in pilots:
-                self.combo_pilots.addItem(name, pilot_id)  # Используйте addItem с данными
+                self.combo_pilots.addItem(name, pilot_id)
+                self.combo_info_pilots.addItem(name, pilot_id)
             
             # Получение рейсов
             cursor.execute("""SELECT flights.id,flights.pilot_id, flights.destination,flights.weight, flights.status
                             FROM flights 
                             LEFT JOIN pilots ON flights.pilot_id = pilots.id 
-                            ORDER BY flights.id DESC""")
+                            ORDER BY flights.id""")
             flights = cursor.fetchall()
             print(f"Найдено рейсов: {len(flights)}")  # Отладка
             
@@ -164,6 +171,9 @@ class Orion_main(QMainWindow): #основное окно
 
         if pilot_id is None or pilot_id == "" :
             QMessageBox.warning(self, "Ошибка", "Нет доступных пилотов")
+            return
+        elif pilot_id == "Выберите пилота":
+            QMessageBox.warning(self, "Ошибка", "Выберите пилота")
             return
 
         conn = sqlite3.connect(self.db_name)
@@ -242,24 +252,105 @@ class Orion_main(QMainWindow): #основное окно
         conn.commit()
         conn.close()
         self.refresh_all()
- 
+    
+    def add_info(self):
+        age = self.age_input.text().strip()
+        exp = self.exp_input.text().strip()
+        bio = self.bio_input.text()
+        current_pilot = self.combo_info_pilots.currentText()
+        current_pilot_id = self.combo_info_pilots.currentIndex()
+        print(f"Выбраный комбо {current_pilot_id}")
+
+        if bio is None or bio == "" or age is None or exp is None:
+            QMessageBox.warning(self, "Ошибка", "Заполните все поля")
+            return
+        
+        try:
+            int(age)
+        except ValueError:
+            QMessageBox.warning(self, "Ошибка", "Возраст должен быть числом")
+            return
+
+        try:
+            int(exp)
+        except ValueError:
+            QMessageBox.warning(self, "Ошибка", "Стаж должен быть числом")
+            return
+        
+        if current_pilot == "Выберите пилота":
+            QMessageBox.warning(self, "Ошибка", "Выберите пилота")
+            return
+        
+        if current_pilot is None:
+            QMessageBox.warning(self, "Ошибка", "Нету доступных пилотов")
+            return
+        
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO infomation(age, exp, bio, pilot_id) VALUES (?, ?, ?, ?)", (age, exp, bio, current_pilot_id))
+        conn.commit()
+        conn.close()
+
+        self.age_input.clear()
+        self.exp_input.clear()
+        self.bio_input.clear()
+        self.refresh_all()
+
+
+
+
+
+        
+    
+    def open_info(self):
+        current_pilot_id = self.flight_table.currentRow()
+
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT infomation.pilot_id
+                            FROM infomation
+                            JOIN pilots ON infomation.pilot_id = ?""", (current_pilot_id, ))
+        pilot_id = cursor.fetchone()
+        print(pilot_id)
+
+        if pilot_id is None:
+            QMessageBox.warning(self, "Ошибка", "По выбранному пилоту отсутсвует информация")
+            return
+        
+        dialog = Info_Dialog(current_pilot_id, self.db_name, self)
+        dialog.exec()
+        
+
+
+
+
+
+
 class Info_Dialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, pilot_id, db_name, parent=None):
         super().__init__(parent)
         uic.loadUi("orion_info_dialog.ui", self)
-    
+        self.db_name = db_name
+        self.pilot_id = pilot_id
+        self.show_info()
+
+
+
+
+
     def show_info(self):
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
         cursor.execute("""SELECT infomation.id, infomation.age, infomation.exp, infomation.bio, infomation.pilot_id
                             FROM infomation
-                            JOIN pilots ON infomation.pilot_id = pilots.id
-                            ORDER BY infomation.id""")
-        info = cursor.fetchall()
-        self.age_label.addText(f"Возраст: {info[1]}")
-        self.exp_label.addText(f"Стаж: {info[2]}")
-        self.bio_label.addText(f"Биография: {info[3]}")
-        self.info_label.addTetx(f"Информация о: {info[4]}")
+                            JOIN pilots ON infomation.pilot_id = pilots.id""")
+        info = cursor.fetchone()
+        self.age_label.setText(f"Возраст: {info[1]}")
+        self.exp_label.setText(f"Стаж: {info[2]}")
+        self.bio_label.setText(f"Биография: {info[3]}")
+        self.info_label.setText(f"Информация о: {info[4]}")
+        conn.close()
 
     
 
@@ -306,7 +397,3 @@ if __name__ == "__main__":
         else:
             break
     sys.exit(0)
-
-
-          
-
